@@ -1,26 +1,34 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Shield, User, Lock, AlertCircle, Key } from 'lucide-react';
+import { Shield, User, Lock, AlertCircle, Key, UserCircle } from 'lucide-react';
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Form States
   const [accessCode, setAccessCode] = useState('');
+  const [username, setUsername] = useState('');
 
   const handleSSO = async (role) => {
+    // Validation
     if (!accessCode) {
-      setError("Please enter the Access Code first.");
+      setError("Please enter the Access Code.");
+      return;
+    }
+    if (role === 'student' && !username.trim()) {
+      setError("Please enter your Full Name.");
       return;
     }
 
     setIsLoading(true);
     setError('');
     
-    // Pass access code to context -> backend
-    const result = await login(role, accessCode);
+    // Pass username to context -> backend
+    const result = await login(role, accessCode, username);
     
     if (result.success) {
       navigate('/dashboard'); 
@@ -52,6 +60,21 @@ const Login = () => {
             </div>
           )}
 
+          {/* Full Name Input (New) */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700 ml-1">Full Name</label>
+            <div className="relative">
+              <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input 
+                type="text"
+                placeholder="e.g. John Doe"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              />
+            </div>
+          </div>
+
           {/* Access Code Input */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700 ml-1">Access Code</label>
@@ -59,14 +82,14 @@ const Login = () => {
               <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
                 type="password"
-                placeholder="Enter Student or Faculty PIN"
+                placeholder="Enter PIN Code"
                 value={accessCode}
                 onChange={(e) => setAccessCode(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
               />
             </div>
             {/* <p className="text-[10px] text-slate-400 text-right">
-              Hint: Student (<span className="font-mono">student123</span>) | Faculty (<span className="font-mono">admin123</span>)
+              Codes: Student (<span className="font-mono">student123</span>) | Faculty (<span className="font-mono">admin123</span>)
             </p> */}
           </div>
 
@@ -82,7 +105,7 @@ const Login = () => {
                 </div>
                 <div className="text-left">
                   <p className="font-semibold text-slate-800">Student Login</p>
-                  <p className="text-xs text-slate-500">Log in with Student PIN</p>
+                  <p className="text-xs text-slate-500">Log in as Student</p>
                 </div>
               </div>
               <div className="text-slate-300 group-hover:text-indigo-500">→</div>
@@ -99,7 +122,7 @@ const Login = () => {
                 </div>
                 <div className="text-left">
                   <p className="font-semibold text-slate-800">Faculty Access</p>
-                  <p className="text-xs text-slate-500">Log in with Faculty PIN</p>
+                  <p className="text-xs text-slate-500">Log in as Faculty</p>
                 </div>
               </div>
               <div className="text-slate-300 group-hover:text-emerald-500">→</div>

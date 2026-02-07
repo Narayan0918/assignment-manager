@@ -16,11 +16,11 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Login Function (Calls Backend)
-  const login = async (role, accessCode) => {
+  // Login Function (Now accepts username)
+  const login = async (role, accessCode, username) => {
     try {
-      // Send Access Code for validation
-      const { data } = await api.post('/auth/sso-mock', { role, accessCode });
+      // Send role, accessCode, AND username to backend
+      const { data } = await api.post('/auth/sso-mock', { role, accessCode, username });
       
       // Save to memory and local storage
       setUser(data);
@@ -44,5 +44,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use auth easily
 export const useAuth = () => useContext(AuthContext);

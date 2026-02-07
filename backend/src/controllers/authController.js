@@ -7,9 +7,8 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// @desc    Auth user & get token
+// @desc    Auth user & get token (Standard Login)
 // @route   POST /api/auth/login
-// @access  Public
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -30,7 +29,6 @@ const authUser = asyncHandler(async (req, res) => {
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
-// @access  Public
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, role, department } = req.body;
   const userExists = await User.findOne({ email });
@@ -58,16 +56,13 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Mock SSO Login with Access Code Check
+// @desc    Mock SSO Login (Dynamic Name Support)
 // @route   POST /api/auth/sso-mock
 // @access  Public
 const mockSSOLogin = asyncHandler(async (req, res) => {
-  const { role, accessCode } = req.body; // Expects 'student' or 'faculty' AND 'accessCode'
+  const { role, accessCode, username } = req.body; 
   
-  // --- SECURITY CHECK ---
-  // In a real app, this would be validated against a database hash or LDAP server.
-  // For Mock SSO, we enforce specific codes to prevent role hopping.
-  
+  // 1. Security Check (Access Code)
   if (role === 'faculty' && accessCode !== 'admin123') {
     res.status(401);
     throw new Error('Invalid Faculty Access Code. (Try: admin123)');
@@ -78,26 +73,47 @@ const mockSSOLogin = asyncHandler(async (req, res) => {
     throw new Error('Invalid Student Access Code. (Try: student123)');
   }
 
-  // Define default mock credentials
-  const mockData = role === 'faculty' ? {
-    name: "Dr. Sarah Professor",
-    email: "faculty@university.edu",
-    password: "password123", 
-    department: "Computer Science",
-    role: "faculty"
-  } : {
-    name: "Alex Student",
-    email: "student@university.edu",
-    password: "password123",
-    department: "Computer Science",
-    role: "student"
-  };
+  // 2. Determine User Identity
+  let mockData;
 
-  // Check if mock user exists, if not create them
+  if (role === 'faculty') {
+    // Faculty identity is usually static for this prototype
+    mockData = {
+      name: "Dr. Sarah Professor",
+      email: "faculty@university.edu",
+      role: "faculty",
+      password: "password123",
+      department: "Computer Science"
+    };
+  } else {
+    // Student identity is DYNAMIC based on input
+    if (!username) {
+      res.status(400);
+      throw new Error('Student Name is required for login.');
+    }
+
+    // Create a fake email based on the name (e.g., "John Doe" -> "john.doe@university.edu")
+    const sanitizedEmail = username.toLowerCase().replace(/\s+/g, '.') + '@university.edu';
+    
+    mockData = {
+      name: username, // Use the name typed in the UI
+      email: sanitizedEmail,
+      role: "student",
+      password: "password123",
+      department: "Computer Science"
+    };
+  }
+
+  // 3. Find or Create User
   let user = await User.findOne({ email: mockData.email });
 
   if (!user) {
+    // First time this specific student has logged in
     user = await User.create(mockData);
+  } else {
+    // If user exists, update their name just in case they fixed a typo
+    user.name = mockData.name;
+    await user.save();
   }
 
   res.json({
