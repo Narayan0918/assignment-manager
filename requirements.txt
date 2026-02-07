@@ -1,0 +1,96 @@
+Secure Assignment Submission System - Installation Requirements
+
+NOTE: This project uses Node.js. Run these commands in your terminal.
+
+==========================================
+
+1. PREREQUISITES
+
+==========================================
+
+- Node.js (v18 or higher recommended)
+
+- MongoDB (Local Community Server OR Atlas Cloud Account)
+
+==========================================
+
+2. BACKEND DEPENDENCIES
+
+==========================================
+
+Navigate to the backend folder first:
+
+cd backend
+
+Core Framework & Database
+
+npm install express mongoose dotenv cors
+
+Authentication & Security
+
+npm install jsonwebtoken bcryptjs
+
+File Handling & Storage
+
+npm install multer cloudinary multer-storage-cloudinary
+
+Utilities
+
+npm install express-async-handler
+
+Development Tools (Auto-restarts server)
+
+npm install --save-dev nodemon
+
+==========================================
+
+3. FRONTEND DEPENDENCIES
+
+==========================================
+
+Navigate to the frontend folder:
+
+cd frontend
+
+React Framework (Vite) - Usually installed during setup
+
+npm create vite@latest . -- --template react
+
+Routing & API
+
+npm install react-router-dom axios
+
+UI Components & Icons
+
+npm install lucide-react
+
+Styling (Tailwind CSS v4)
+
+npm install tailwindcss @tailwindcss/vite
+
+==========================================
+
+4. HOW TO START
+
+==========================================
+
+Terminal 1 (Backend):
+
+cd backend
+
+npm run dev
+
+Terminal 2 (Frontend):
+
+cd frontend
+
+npm run dev
+
+
+========================================================
+
+Access codes
+    Students => student123
+    Faculty => admin123
+
+========================================================
